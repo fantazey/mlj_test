@@ -27,6 +27,11 @@ class Departments(db.Model):
     dept_no = db.Column(db.CHAR(4), primary_key=True, nullable=False)
     dept_name = db.Column(db.Text, unique=True, nullable=False)
 
+    def __repr__(self):
+        return jsonify({
+            'dept_no': self.dept_no,
+            'dept_name': self.dept_name
+        })
 
 class DeptEmp(db.Model):
     __tablename__ = 'dept_emp'

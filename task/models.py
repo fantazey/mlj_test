@@ -1,5 +1,6 @@
 from task import db
 from marshmallow_jsonapi import Schema, fields
+from marshmallow_jsonapi.flask import Relationship
 
 
 class Employees(db.Model):
@@ -19,6 +20,12 @@ class EmployeesSchema(Schema):
     first_name = fields.Str(required=True)
     gender = fields.Str()
 
+    department = Relationship(
+        related_view='department_detail',
+        include_data=True,
+        type_='departments'
+    )
+
     class Meta:
         type_ = 'employees'
 
@@ -33,6 +40,11 @@ class DepartmentsSchema(Schema):
     id = fields.Str(dump_only=True)
     dept_name = fields.Str(required=True)
 
+    employees = Relationship(
+        include_data=True,
+        type_='employees'
+    )
+
     class Meta:
         type_ = 'departments'
 
@@ -44,7 +56,7 @@ class DeptEmp(db.Model):
     from_date = db.Column(db.Date, nullable=False)
     to_date = db.Column(db.Date, nullable=False)
 
-# todo: add relations
+
 class DeptEmpSchema(Schema):
     id = fields.Str(dump_only=True)
     dept_no = fields.Str(dump_only=True)

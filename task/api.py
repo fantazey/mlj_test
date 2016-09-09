@@ -1,6 +1,6 @@
 from datetime import datetime
 from task import app, models, db
-from flask import jsonify, request
+from flask import jsonify, request, make_response
 # todo: handle errors
 
 
@@ -11,13 +11,17 @@ def list_of_departments():
     return jsonify(data)
 
 
+@app.route('/api/departments/<id>', methods=['GET'])
+def department_detail(id):
+    dept = models.Departments.queru.filter(id=id).first()
+    data,errs = models.DepartmentsSchema().dump(dept)
+    return jsonify(data)
+
+
 @app.route('/api/employees', methods=['GET'])
 def list_of_employees():
-    start = datetime.now()
     emps = models.Employees.query.all()
     data, errs = models.EmployeesSchema(many=True).dump(emps)
-    end = datetime.now()
-    print end - start
     return jsonify(data)
 
 
@@ -41,8 +45,8 @@ def add_employees():
     )
     db.session.add(dept_emp)
     db.session.commit()
-    emp_ = models.Employees.query.filter(models.Employees.id==request.json.get('id'))
-    data, err = models.EmployeesSchema(many=True).dump(emp_)
+    emp_ = models.Employees.query.filter(models.Employees.id==request.json.get('id')).first()
+    data, err = models.EmployeesSchema().dump(emp_)
     return jsonify(data)
 
 
@@ -54,5 +58,15 @@ def add_dept():
     )
     db.session.add(dept)
     db.session.commit()
-    return jsonify({
-    })
+    dept_ = models.Departments.query.filter(models.Departments.id==request.json.get('id'))
+    data, err = models.DepartmentsSchema().dump(dept_)
+    return jsonify(data)
+
+
+@app.route('/api/employees', methods=["DELETE"])
+def remove_employee():
+    employee = models.Employees.query.filter(models.Employees.id==request.json.get('id'))
+    if employee:
+        db.session.delete(employee.first())
+        db.session.commit()
+    return ('', 200)
